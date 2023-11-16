@@ -2,8 +2,9 @@
   <el-config-provider namespace="ep">
     <BaseHeader/>
     <br>
+    <!--store.listSelect會傳入元件變成api路徑呼叫不同技能的api-->
     <!--:key會在按祕法按鈕時值++(0->1)然後讓List這個元件刷新-->
-    <List :api="store.listSelect" :key="store.listKey"/>
+    <SkillList :api="store.listSelect" :key="store.listKey"/>
 
   </el-config-provider>
 </template>

@@ -3,8 +3,8 @@ import {toggleDark} from "~/composables";
 import {global} from "../../composables/pinia";
 const store = global();
 
+//按下時切換listSelect的值還有listKey++
 function listSelectClick(skill: string) {
-
   store.listSelect = skill;
   store.listKey++;
 }

@@ -20,8 +20,8 @@ declare module 'vue' {
     ElTable: typeof import('element-plus/es')['ElTable']
     ElTableColumn: typeof import('element-plus/es')['ElTableColumn']
     HelloWorld: typeof import('./components/HelloWorld.vue')['default']
-    List: typeof import('./components/List.vue')['default']
     Logos: typeof import('./components/Logos.vue')['default']
+    SkillList: typeof import('./components/SkillList.vue')['default']
   }
   export interface ComponentCustomProperties {
     vLoading: typeof import('element-plus/es')['ElLoadingDirective']
