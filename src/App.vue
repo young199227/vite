@@ -1,13 +1,10 @@
 <template>
   <el-config-provider namespace="ep">
-    <BaseHeader />
-    <div class="flex main-container">
-      <BaseSide />
-      <div w="full" py="4">
-        <Logos my="4" />
-        <HelloWorld msg="Hello Vue 3 + Element Plus + Vite" />
-      </div>
-    </div>
+    <BaseHeader/>
+    <br>
+    <!--:key會在按祕法按鈕時值++(0->1)然後讓List這個元件刷新-->
+    <List :api="store.listSelect" :key="store.listKey"/>
+
   </el-config-provider>
 </template>
 
@@ -21,3 +18,8 @@
   height: calc(100vh - var(--ep-menu-item-height) - 3px);
 }
 </style>
+<script setup lang="ts">
+import {global} from "../src/composables/pinia";
+
+const store = global();
+</script>
