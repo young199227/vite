@@ -1,43 +1,47 @@
 <script setup lang="ts">
-import {ref} from "vue";
-import axios from 'axios';
+import { ref } from "vue";
+import axios from "axios";
+import { global } from "../../src/composables/pinia";
+const store = global();
 
 //api值來源在pinia.ts傳入App.vue再傳入這裡
 const api = defineProps<{ api: string }>();
 
-const skillList = ref('');
-const tableData = ref('');
+const skillList = ref("");
+const tableData = ref("");
 function showSkill() {
-  axios.get('http://127.0.0.1:8000/api/' + api.api)
-      .then(response => {
-        // 處理成功的回應
-        console.log(response.data);
-        skillList.value = response.data;
-        tableData.value = response.data;
-      })
-      .catch(error => {
-        // 處理錯誤
-        console.error(error);
-      });
+  axios
+    .get(store.apiUrl + "/show/" + api.api)
+    .then((response) => {
+      // 處理成功的回應
+      console.log(response.data);
+      skillList.value = response.data.data;
+      tableData.value = response.data.data;
+    })
+    .catch((error) => {
+      // 處理錯誤
+      console.error(error);
+    });
 }
 
-const orderName = ref('');
-const orderMoney = ref('');
+const orderName = ref("");
+const orderMoney = ref("");
 function addSkill() {
-
-  axios.post('http://127.0.0.1:8000/api/add', {
-    'name': orderName.value,
-    'money': orderMoney.value,
-  }).then(response => {
-    // 處理成功的回應
-    console.log(response.data);
-    showSkill();
-  }).catch(error => {
-    // 處理錯誤
-    console.error(error.response.data.errors);
-    alert(error.response.data.errors);
-  });
-
+  axios
+    .post(store.apiUrl + "/add", {
+      name: orderName.value,
+      money: orderMoney.value,
+    })
+    .then((response) => {
+      // 處理成功的回應
+      console.log(response.data);
+      showSkill();
+    })
+    .catch((error) => {
+      // 處理錯誤
+      console.error(error.response.data.errors);
+      alert(error.response.data.errors);
+    });
 }
 
 //一進入先拿資料
@@ -45,12 +49,10 @@ showSkill();
 
 //進入後先讀loading 0.5秒
 const fullscreenLoading = ref(false);
-fullscreenLoading.value = true
+fullscreenLoading.value = true;
 setTimeout(() => {
-  fullscreenLoading.value = false
-}, 500)
-
-
+  fullscreenLoading.value = false;
+}, 500);
 </script>
 
 <template>
@@ -64,15 +66,23 @@ setTimeout(() => {
   <el-row justify="center">
     <el-col :md="18">
       <el-space direction="vertical" :fill="true" :size="13">
-        <el-card class="box-card" shadow="never" v-for="item in skillList" :key="item.id">
+        <el-card
+          class="box-card"
+          shadow="never"
+          v-for="item in skillList"
+          :key="item.id"
+        >
           <template #header>
             <div class="card-header">
-              <!--              <el-image style="width: 30px; height: 30px" src="/img/Gl8azUj.png"/>-->
-              <br>
+              <!-- <el-image
+                style="width: 30px; height: 30px"
+                :src="store.url + item.img_url"
+              /> -->
+              <br />
               <span>{{ item.name }}</span>
             </div>
           </template>
-          <div class="multiline-text">{{ item.money }}</div>
+          <div class="multiline-text">{{ item.describe }}</div>
         </el-card>
       </el-space>
     </el-col>

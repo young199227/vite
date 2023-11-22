@@ -1,10 +1,10 @@
 <template>
   <el-config-provider namespace="ep">
-    <BaseHeader/>
-    <br>
+    <BaseHeader />
+    <br />
     <!--store.listSelect會傳入元件變成api路徑呼叫不同技能的api-->
     <!--:key會在按祕法按鈕時值++(0->1)然後讓List這個元件刷新-->
-    <SkillList :api="store.listSelect" :key="store.listKey"/>
+    <SkillList :api="store.listSelect" :key="store.listKey" />
 
   </el-config-provider>
 </template>
@@ -20,7 +20,7 @@
 }
 </style>
 <script setup lang="ts">
-import {global} from "../src/composables/pinia";
+import { global } from "../src/composables/pinia";
 
 const store = global();
 </script>
