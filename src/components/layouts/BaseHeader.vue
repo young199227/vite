@@ -1,18 +1,117 @@
 <script lang="ts" setup>
 import { toggleDark } from "~/composables";
+import { reactive, ref } from "vue";
 import { global } from "../../composables/pinia";
+import { ElMessage, ElMessageBox } from "element-plus";
+import axios from "axios";
+//全域變數用
 const store = global();
 
-//按下時切換listSelect的值還有listKey++
+
+
+//技能頁面轉換 按下時切換listSelect的值還有listKey++
 function listSelectClick(skill: string) {
   store.listSelect = skill;
   store.listKey++;
 }
+
+//註冊表單
+const registerFormVisible = ref(false);
+const registerForm = reactive({
+  name: "",
+  password: "",
+});
+
+//註冊
+function register() {
+  //先關閉表單
+  registerFormVisible.value = false;
+
+  //api註冊
+  axios
+    .post(store.apiUrl + "/register", registerForm)
+    .then((response) => {
+      // 處理成功的回應
+      console.log(response.data.message);
+      alert(response.data.message);
+      registerForm.name = "";
+      registerForm.password = "";
+      setTimeout(() => {
+        location.reload();
+      }, 3000);
+    })
+    .catch((error) => {
+      // 處理錯誤
+      console.error(error.response.data);
+    });
+}
+
+//登入表單
+const loginFormVisible = ref(false);
+const loginForm = reactive({
+  name: "",
+  password: "",
+});
+
+//登入
+function login() {
+  //先關閉表單
+  loginFormVisible.value = false;
+
+  //api登入
+  axios
+    .post(store.apiUrl + "/login", loginForm)
+    .then((response) => {
+      // 處理成功的回應
+      console.log(response.data.message);
+      alert(response.data.message);
+      loginForm.name = "";
+      loginForm.password = "";
+    })
+    .catch((error) => {
+      // 處理錯誤
+      console.error(error.response.data);
+    });
+}
+
+//新增技能表單
+const skillFormVisible = ref(false);
+const skillForm = reactive({
+  type: "",
+  name: "",
+  describe: "",
+  sort: "",
+  image: "",
+});
+
+//新增技能
+function addSkill() {
+  //先關閉表單
+  skillFormVisible.value = false;
+
+  //api新增技能
+  axios
+    .post(store.apiUrl + "/login", skillForm)
+    .then((response) => {
+      // 處理成功的回應
+      console.log(response.data.message);
+      alert(response.data.message);
+      skillForm.name = "";
+      skillForm.type = "";
+      skillForm.describe = "";
+      skillForm.sort = "";
+      skillForm.image = "";
+    })
+    .catch((error) => {
+      // 處理錯誤
+      console.error(error.response.data);
+    });
+}
 </script>
 
 <template>
-  <el-menu class="el-menu-demo" mode="horizontal">
-    <el-menu-item index="0">
+  <el-menu class="el-menu-demo" mode="horizontal" :ellipsis="false">
+    <el-menu-item index="1">
       <img
         style="width: 100px"
         src="/element-plus-logo.svg"
@@ -20,19 +119,17 @@ function listSelectClick(skill: string) {
       />
     </el-menu-item>
 
-    <el-sub-menu index="1">
+    <el-sub-menu index="2">
       <template #title>祕法才能</template>
-      <el-menu-item index="1-1" @click="listSelectClick('mag')"
+      <el-menu-item index="2-1" @click="listSelectClick('mag')"
         >黑魔導士
       </el-menu-item>
-      <el-menu-item index="1-2" @click="listSelectClick('bow')"
+      <el-menu-item index="2-2" @click="listSelectClick('bow')"
         >狙擊手</el-menu-item
       >
     </el-sub-menu>
 
-
-
-    <el-menu-item index="2" @click="toggleDark()">
+    <el-menu-item index="3" @click="toggleDark()">
       <button
         class="border-none w-full bg-transparent cursor-pointer"
         style="height: var(--ep-menu-item-height)"
@@ -40,5 +137,98 @@ function listSelectClick(skill: string) {
         <i inline-flex i="dark:ep-moon ep-sunny" />
       </button>
     </el-menu-item>
+
+    <div class="flex-grow" />
+    <el-sub-menu index="4">
+      <el-menu-item index="4-1" @click="registerFormVisible = true"
+        >註冊</el-menu-item
+      >
+      <el-menu-item index="4-2" @click="loginFormVisible = true"
+        >登入</el-menu-item
+      >
+      <el-menu-item index="4-3" @click="skillFormVisible = true"
+        >新增技能</el-menu-item
+      >
+    </el-sub-menu>
   </el-menu>
+
+  <!-- 註冊表單 -->
+  <el-dialog v-model="registerFormVisible" title="註冊" class="w-80">
+    <el-form :model="registerForm">
+      <el-form-item label="帳號">
+        <el-input v-model="registerForm.name" />
+      </el-form-item>
+      <el-form-item label="密碼">
+        <el-input
+          v-model="registerForm.password"
+          type="password"
+          show-password
+        />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="registerFormVisible = false">取消</el-button>
+        <el-button type="primary" @click="register"> 註冊 </el-button>
+      </span>
+    </template>
+  </el-dialog>
+
+  <!-- 登入表單 -->
+  <el-dialog v-model="loginFormVisible" title="登入" class="w-80">
+    <el-form :model="loginForm">
+      <el-form-item label="帳號">
+        <el-input v-model="loginForm.name" />
+      </el-form-item>
+      <el-form-item label="密碼">
+        <el-input v-model="loginForm.password" type="password" show-password />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="loginFormVisible = false">取消</el-button>
+        <el-button type="primary" @click="login"> 登入 </el-button>
+      </span>
+    </template>
+  </el-dialog>
+
+  <!-- 新增技能表單 -->
+  <el-dialog v-model="skillFormVisible" title="新增技能" class="w-80">
+    <el-form :model="skillForm">
+      <el-form-item label="技能種類">
+        <el-select v-model="skillForm.type" placeholder="選擇技能" style="width: 115px">
+          <el-option label="狙擊手" value="bow" />
+          <el-option label="黑魔導士" value="mag" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="技能名稱">
+        <el-input v-model="skillForm.name" />
+      </el-form-item>
+      <el-form-item label="技能描述">
+        <el-input
+          v-model="skillForm.describe"
+          :autosize="{ minRows: 2, maxRows: 4 }"
+          type="textarea"
+        />
+      </el-form-item>
+      <el-form-item label="排列順序">
+        <el-input-number v-model="skillForm.sort" :min="1" :max="20"/>
+      </el-form-item>
+      <el-form-item label="圖片">
+        <el-input v-model="skillForm.image" type="file"/>
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="skillFormVisible = false">取消</el-button>
+        <el-button type="primary" @click="addSkill"> 登入 </el-button>
+      </span>
+    </template>
+  </el-dialog>
 </template>
+
+<style>
+.flex-grow {
+  flex-grow: 1;
+}
+</style>
