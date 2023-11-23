@@ -7,9 +7,7 @@ import axios from "axios";
 //全域變數用
 const store = global();
 
-
-
-//技能頁面轉換 按下時切換listSelect的值還有listKey++
+//技能頁面轉換 按下時切換listSelect的值還有listKey++(++是為了讓app.vue的組件刷新時是完全新的)
 function listSelectClick(skill: string) {
   store.listSelect = skill;
   store.listKey++;
@@ -27,11 +25,9 @@ function register() {
   //先關閉表單
   registerFormVisible.value = false;
 
-  //api註冊
   axios
     .post(store.apiUrl + "/register", registerForm)
     .then((response) => {
-      // 處理成功的回應
       console.log(response.data.message);
       alert(response.data.message);
       registerForm.name = "";
@@ -41,7 +37,6 @@ function register() {
       }, 3000);
     })
     .catch((error) => {
-      // 處理錯誤
       console.error(error.response.data);
     });
 }
@@ -58,18 +53,39 @@ function login() {
   //先關閉表單
   loginFormVisible.value = false;
 
-  //api登入
   axios
     .post(store.apiUrl + "/login", loginForm)
     .then((response) => {
-      // 處理成功的回應
-      console.log(response.data.message);
       alert(response.data.message);
       loginForm.name = "";
       loginForm.password = "";
+      //存入skill_token
+      store.setCookie("skill_token", response.data.data.skill_token);
+      //然後用api在驗證一次
+      store.checkSkillToken();
     })
     .catch((error) => {
-      // 處理錯誤
+      console.error(error.response.data);
+    });
+}
+
+//登出
+function logout() {
+  axios
+    .post(
+      store.apiUrl + "/logout",
+      {},
+      {
+        headers: {
+          Authorization: "Bearer " + store.getCookie("skill_token"),
+        },
+      }
+    )
+    .then((response) => {
+      store.deleteCookie("skill_token");
+      location.reload();
+    })
+    .catch((error) => {
       console.error(error.response.data);
     });
 }
@@ -89,11 +105,9 @@ function addSkill() {
   //先關閉表單
   skillFormVisible.value = false;
 
-  //api新增技能
   axios
-    .post(store.apiUrl + "/login", skillForm)
+    .post(store.apiUrl + "/addSkill", skillForm)
     .then((response) => {
-      // 處理成功的回應
       console.log(response.data.message);
       alert(response.data.message);
       skillForm.name = "";
@@ -103,14 +117,15 @@ function addSkill() {
       skillForm.image = "";
     })
     .catch((error) => {
-      // 處理錯誤
       console.error(error.response.data);
     });
 }
 </script>
 
 <template>
+  <!-- head -->
   <el-menu class="el-menu-demo" mode="horizontal" :ellipsis="false">
+    <!-- log -->
     <el-menu-item index="1">
       <img
         style="width: 100px"
@@ -119,6 +134,7 @@ function addSkill() {
       />
     </el-menu-item>
 
+    <!-- 技能選擇鈕 -->
     <el-sub-menu index="2">
       <template #title>祕法才能</template>
       <el-menu-item index="2-1" @click="listSelectClick('mag')"
@@ -129,6 +145,7 @@ function addSkill() {
       >
     </el-sub-menu>
 
+    <!-- 黑暗版按鈕 -->
     <el-menu-item index="3" @click="toggleDark()">
       <button
         class="border-none w-full bg-transparent cursor-pointer"
@@ -139,15 +156,26 @@ function addSkill() {
     </el-menu-item>
 
     <div class="flex-grow" />
+    <!-- 右上的按鈕表 -->
+    
     <el-sub-menu index="4">
-      <el-menu-item index="4-1" @click="registerFormVisible = true"
+      <el-menu-item
+        v-if="!store.is_userAuth"
+        index="4-1"
+        @click="registerFormVisible = true"
         >註冊</el-menu-item
       >
-      <el-menu-item index="4-2" @click="loginFormVisible = true"
+      <el-menu-item
+        v-if="!store.is_userAuth"
+        index="4-2"
+        @click="loginFormVisible = true"
         >登入</el-menu-item
       >
       <el-menu-item index="4-3" @click="skillFormVisible = true"
         >新增技能</el-menu-item
+      >
+      <el-menu-item v-if="store.is_userAuth" index="4-4" @click="logout"
+        >登出</el-menu-item
       >
     </el-sub-menu>
   </el-menu>
@@ -196,7 +224,11 @@ function addSkill() {
   <el-dialog v-model="skillFormVisible" title="新增技能" class="w-80">
     <el-form :model="skillForm">
       <el-form-item label="技能種類">
-        <el-select v-model="skillForm.type" placeholder="選擇技能" style="width: 115px">
+        <el-select
+          v-model="skillForm.type"
+          placeholder="選擇技能"
+          style="width: 115px"
+        >
           <el-option label="狙擊手" value="bow" />
           <el-option label="黑魔導士" value="mag" />
         </el-select>
@@ -212,10 +244,10 @@ function addSkill() {
         />
       </el-form-item>
       <el-form-item label="排列順序">
-        <el-input-number v-model="skillForm.sort" :min="1" :max="20"/>
+        <el-input-number v-model="skillForm.sort" :min="1" :max="20" />
       </el-form-item>
       <el-form-item label="圖片">
-        <el-input v-model="skillForm.image" type="file"/>
+        <el-input v-model="skillForm.image" type="file" />
       </el-form-item>
     </el-form>
     <template #footer>

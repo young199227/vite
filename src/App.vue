@@ -21,4 +21,7 @@
 <script setup lang="ts">
 import { global } from "../src/composables/pinia";
 const store = global();
+
+//一進入app.vue就判斷有沒有skill_token來決定登入狀態
+store.checkSkillToken();
 </script>
