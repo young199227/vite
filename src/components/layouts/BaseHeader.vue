@@ -91,13 +91,14 @@ function logout() {
 }
 
 //新增技能表單
+const skillFormData = new FormData();
+const image = ref(null);
 const skillFormVisible = ref(false);
 const skillForm = reactive({
   type: "",
   name: "",
   describe: "",
   sort: "",
-  image: "",
 });
 
 //新增技能
@@ -105,21 +106,52 @@ function addSkill() {
   //先關閉表單
   skillFormVisible.value = false;
 
+  skillFormData.append("type", skillForm.type);
+  skillFormData.append("name", skillForm.name);
+  skillFormData.append("describe", skillForm.describe);
+  skillFormData.append("sort", skillForm.sort);
+
   axios
-    .post(store.apiUrl + "/addSkill", skillForm)
+    .post(store.apiUrl + "/addSkill", skillFormData, {
+      headers: {
+        Authorization: "Bearer " + store.getCookie("skill_token"),
+      },
+    })
     .then((response) => {
       console.log(response.data.message);
-      alert(response.data.message);
+      // alert(response.data.message);
+
+      //刷新技能頁面
+      listSelectClick(skillForm.type);
+
       skillForm.name = "";
       skillForm.type = "";
       skillForm.describe = "";
       skillForm.sort = "";
-      skillForm.image = "";
+      image.value = null;
     })
     .catch((error) => {
       console.error(error.response.data);
     });
 }
+
+//選擇圖片的方法
+const handleFileChange = (event: any) => {
+  const file = event.target.files[0];
+
+  if (file) {
+    // Update the ref with the selected file
+    image.value = file;
+
+    // Append the file to FormData
+    skillFormData.append("image", file);
+    console.log("Selected file:", file);
+  } else {
+    // Handle the case where the user canceled file selection
+    image.value = null;
+    console.log("User canceled file selection");
+  }
+};
 </script>
 
 <template>
@@ -137,12 +169,14 @@ function addSkill() {
     <!-- 技能選擇鈕 -->
     <el-sub-menu index="2">
       <template #title>祕法才能</template>
-      <el-menu-item index="2-1" @click="listSelectClick('mag')"
-        >黑魔導士
+      <el-menu-item index="2-1" @click="listSelectClick('mag')">
+        <img src="/img/黑魔島士.png" alt="Element logo" />
+        黑魔導士
       </el-menu-item>
-      <el-menu-item index="2-2" @click="listSelectClick('bow')"
-        >狙擊手</el-menu-item
-      >
+      <el-menu-item index="2-2" @click="listSelectClick('bow')">
+        <img src="/img/狙擊手.png" alt="Element logo" />
+        狙擊手
+      </el-menu-item>
     </el-sub-menu>
 
     <!-- 黑暗版按鈕 -->
@@ -157,7 +191,7 @@ function addSkill() {
 
     <div class="flex-grow" />
     <!-- 右上的按鈕表 -->
-    
+
     <el-sub-menu index="4">
       <el-menu-item
         v-if="!store.is_userAuth"
@@ -171,7 +205,10 @@ function addSkill() {
         @click="loginFormVisible = true"
         >登入</el-menu-item
       >
-      <el-menu-item index="4-3" @click="skillFormVisible = true"
+      <el-menu-item
+        v-if="store.is_userAuth"
+        index="4-3"
+        @click="skillFormVisible = true"
         >新增技能</el-menu-item
       >
       <el-menu-item v-if="store.is_userAuth" index="4-4" @click="logout"
@@ -246,14 +283,14 @@ function addSkill() {
       <el-form-item label="排列順序">
         <el-input-number v-model="skillForm.sort" :min="1" :max="20" />
       </el-form-item>
-      <el-form-item label="圖片">
-        <el-input v-model="skillForm.image" type="file" />
+      <el-form-item label="圖片上傳">
+        <input type="file" @change="handleFileChange" />
       </el-form-item>
     </el-form>
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="skillFormVisible = false">取消</el-button>
-        <el-button type="primary" @click="addSkill"> 登入 </el-button>
+        <el-button type="primary" @click="addSkill"> 新增技能 </el-button>
       </span>
     </template>
   </el-dialog>
