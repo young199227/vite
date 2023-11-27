@@ -4,8 +4,16 @@ import axios from "axios";
 export const global = defineStore("global", {
     state: () => {
         return {
+            //linux伺服器上用
+            // url: 'http://ggyy.com',
+            // apiUrl: 'http://ggyy.com/api',
+            // vueUrl: 'http://skill.com/',
+
+            //本機開發用
             url: 'http://127.0.0.1:8000',
             apiUrl: 'http://127.0.0.1:8000/api',
+            vueUrl: 'http://localhost:5173/',
+
             listSelect: 'bow',
             listKey: 0,
             userName: '',
